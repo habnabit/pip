@@ -266,7 +266,8 @@ class RequirementSet(object):
                 # If there's more extras to add to the existing requirement,
                 # add them.
                 if extras != extras_union:
-                    install_req.extras = tuple(extras_union)
+                    install_req.extras = install_req.req.extras = (
+                        tuple(extras_union))
             if parent_req_name:
                 parent_req = self.get_requirement(parent_req_name)
                 self._dependencies[parent_req].append(install_req)

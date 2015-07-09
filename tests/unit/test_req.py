@@ -367,3 +367,16 @@ def test_extra_set_union(reqs, expected_extras):
         req_set.add_requirement(InstallRequirement.from_line(req), 'parent')
     req = req_set.get_requirement('test')
     assert set(req.extras) == set(expected_extras)
+
+
+def test_extra_set_union_shows_up_in_req():
+    """
+    The extras added to a Requirement from doing set union on extras will show
+    up in the Requirement's req.
+    """
+    req_set = RequirementSet('', '', '', session=PipSession())
+    req_set.add_requirement(InstallRequirement.from_line('parent'))
+    for req in ['test', 'test[e1]']:
+        req_set.add_requirement(InstallRequirement.from_line(req), 'parent')
+    req = req_set.get_requirement('test')
+    assert str(req.req) == 'test[e1]'

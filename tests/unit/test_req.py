@@ -342,3 +342,28 @@ def test_exclusive_environment_markers():
     req_set.add_requirement(eq26)
     req_set.add_requirement(ne26)
     assert req_set.has_requirement('Django')
+
+
+@pytest.mark.parametrize(('reqs', 'expected_extras'), [
+    (['test'], []),
+    (['test[e1]'], ['e1']),
+    (['test[e2]'], ['e2']),
+    (['test[e1]', 'test[e1]'], ['e1']),
+    (['test[e1]', 'test[e2]'], ['e1', 'e2']),
+    (['test', 'test[e1]'], ['e1']),
+    (['test[e1]', 'test'], ['e1']),
+    (['test[e1,e2]', 'test[e2,e3]'], ['e1', 'e2', 'e3']),
+    (['test[e1,e2]', 'test[e3,e4]'], ['e1', 'e2', 'e3', 'e4']),
+    (['test[e1,e2]', 'test[e2,e3]', 'test[e3,e4]'], ['e1', 'e2', 'e3', 'e4']),
+])
+def test_extra_set_union(reqs, expected_extras):
+    """
+    RequirementSet will take the set union of all extras specified if the same
+    requirement is specified multiple times.
+    """
+    req_set = RequirementSet('', '', '', session=PipSession())
+    req_set.add_requirement(InstallRequirement.from_line('parent'))
+    for req in reqs:
+        req_set.add_requirement(InstallRequirement.from_line(req), 'parent')
+    req = req_set.get_requirement('test')
+    assert set(req.extras) == set(expected_extras)
